@@ -1,0 +1,163 @@
+{
+  "notes": [
+    {
+      "id": "note_001",
+      "text": "Had an excellent call with John Smith regarding the Q1 expansion plans. They're looking to increase their distribution capacity by 30% and need our support for logistics optimization. Follow-up meeting scheduled for next Tuesday to discuss implementation timeline and pricing structure.",
+      "author": "6849de2c8da98f55690819b3",
+      "companyIds": ["company_001"],
+      "createdAt": "2026-01-09T14:30:00Z"
+    },
+    {
+      "id": "note_002",
+      "text": "Client expressed concerns about delivery timelines for the new product line. Discussed alternative shipping routes and agreed to expedite the first order. Will coordinate with warehouse team to ensure priority handling.",
+      "author": "6849de2c8da98f55690819b3",
+      "companyIds": ["company_002"],
+      "createdAt": "2026-01-09T10:15:00Z"
+    },
+    {
+      "id": "note_003",
+      "text": "Quarterly business review completed. Key highlights: 15% YoY growth, strong performance in automotive sector, exploring opportunities in new verticals. Customer satisfaction score improved to 9.2/10. Discussed renewal terms for next fiscal year.",
+      "author": "6866dcf3af9c593d0806bb57",
+      "companyIds": ["company_003"],
+      "createdAt": "2026-01-09T16:45:00Z"
+    },
+    {
+      "id": "note_004",
+      "text": "Initial discovery call with procurement team. They're evaluating multiple vendors for their industrial supply needs. Our competitive advantage lies in our just-in-time delivery model and extensive inventory. Sent proposal and technical documentation.",
+      "author": "6866dcf3af9c593d0806bb57",
+      "companyIds": ["company_004"],
+      "createdAt": "2026-01-09T11:20:00Z"
+    },
+    {
+      "id": "note_005",
+      "text": "Emergency meeting to address quality concerns on recent shipment. Root cause identified as packaging issue during transit. Implemented corrective actions: enhanced quality checks, upgraded packaging materials, and issued credit for affected items. Customer satisfied with resolution.",
+      "author": "6849de2c8da98f55690819b3",
+      "companyIds": ["company_005"],
+      "createdAt": "2026-01-09T09:00:00Z"
+    },
+    {
+      "id": "note_006",
+      "text": "Strategic partnership discussion focused on exclusive distribution rights for their new product launch in Q2. They're projecting $2M in annual revenue potential. Legal team reviewing contract terms. Very promising opportunity for market expansion.",
+      "author": "6866dcf3af9c593d0806bb57",
+      "companyIds": ["company_001"],
+      "createdAt": "2026-01-09T15:30:00Z"
+    }
+  ],
+  "companies": [
+    {
+      "id": "company_001",
+      "name": "Acme Industrial Supply Co.",
+      "distributor": "Direct",
+      "business_division": "Industrial Equipment",
+      "industry": "Manufacturing"
+    },
+    {
+      "id": "company_002",
+      "name": "Pacific Logistics Partners",
+      "distributor": "Regional Distributor",
+      "business_division": "Logistics & Supply Chain",
+      "industry": "Transportation"
+    },
+    {
+      "id": "company_003",
+      "name": "Global Automotive Components Inc.",
+      "distributor": "National Distributor",
+      "business_division": "Automotive Parts",
+      "industry": "Automotive"
+    },
+    {
+      "id": "company_004",
+      "name": "Midwest Manufacturing Solutions",
+      "distributor": "Direct",
+      "business_division": "Industrial Equipment",
+      "industry": "Manufacturing"
+    },
+    {
+      "id": "company_005",
+      "name": "Coastal Retail Group",
+      "distributor": "Retail Chain",
+      "business_division": "Consumer Products",
+      "industry": "Retail"
+    }
+  ],
+  "deals": [
+    {
+      "id": "deal_001",
+      "deal_name": "Acme Q1 Expansion - Warehouse Equipment",
+      "deal_owner": "6849de2c8da98f55690819b3",
+      "deal_stage": "arxdo4r2w2sz1l8a7by4j19",
+      "pipeline_id": "69580298dc36c3319adb3093",
+      "distributor": "Direct",
+      "amount": 450000,
+      "opportunity_type": "New Business",
+      "created_at": "2026-01-09T14:45:00Z",
+      "stage_updated_at": "2026-01-09T14:45:00Z",
+      "modified_at": "2026-01-09T14:45:00Z"
+    },
+    {
+      "id": "deal_002",
+      "deal_name": "Pacific Logistics - Emergency Shipment Services",
+      "deal_owner": "6849de2c8da98f55690819b3",
+      "deal_stage": "85ngn6t35cnvpr8ig84vd0b",
+      "pipeline_id": "69580298dc36c3319adb3093",
+      "distributor": "Regional Distributor",
+      "amount": 125000,
+      "opportunity_type": "Upsell",
+      "created_at": "2026-01-05T10:00:00Z",
+      "stage_updated_at": "2026-01-09T11:00:00Z",
+      "modified_at": "2026-01-09T11:00:00Z"
+    },
+    {
+      "id": "deal_003",
+      "deal_name": "Global Automotive - Annual Contract Renewal",
+      "deal_owner": "6866dcf3af9c593d0806bb57",
+      "deal_stage": "fy8rr3y4p9qdv6kj9136zjs",
+      "pipeline_id": "69580298dc36c3319adb3093",
+      "distributor": "National Distributor",
+      "amount": 1200000,
+      "opportunity_type": "Renewal",
+      "created_at": "2025-12-15T09:00:00Z",
+      "stage_updated_at": "2026-01-09T17:00:00Z",
+      "modified_at": "2026-01-09T17:00:00Z"
+    },
+    {
+      "id": "deal_004",
+      "deal_name": "Midwest Manufacturing - Industrial Supply Partnership",
+      "deal_owner": "6866dcf3af9c593d0806bb57",
+      "deal_stage": "e8b624a6-1639-4843-810e-db83a0595130",
+      "pipeline_id": "6849de42a68e1c112aa30e83",
+      "distributor": "Direct",
+      "amount": 750000,
+      "opportunity_type": "New Business",
+      "created_at": "2026-01-09T11:30:00Z",
+      "stage_updated_at": "2026-01-09T11:30:00Z",
+      "modified_at": "2026-01-09T11:30:00Z"
+    },
+    {
+      "id": "deal_005",
+      "deal_name": "Coastal Retail - Product Quality Resolution",
+      "deal_owner": "6849de2c8da98f55690819b3",
+      "deal_stage": "9uaj093j221p3oiiply9hd8",
+      "pipeline_id": "69580298dc36c3319adb3093",
+      "distributor": "Retail Chain",
+      "amount": 85000,
+      "opportunity_type": "Recovery",
+      "created_at": "2026-01-09T09:15:00Z",
+      "stage_updated_at": "2026-01-09T09:15:00Z",
+      "modified_at": "2026-01-09T09:15:00Z"
+    },
+    {
+      "id": "deal_006",
+      "deal_name": "Acme Industrial - Exclusive Distribution Rights Q2",
+      "deal_owner": "6866dcf3af9c593d0806bb57",
+      "deal_stage": "97b3a62e-e19f-4997-8bbd-809240d86a4b",
+      "pipeline_id": "6849de42a68e1c112aa30e83",
+      "distributor": "Direct",
+      "amount": 2000000,
+      "opportunity_type": "Strategic Partnership",
+      "created_at": "2026-01-09T15:45:00Z",
+      "stage_updated_at": "2026-01-09T15:45:00Z",
+      "modified_at": "2026-01-09T15:45:00Z"
+    }
+  ]
+}

@@ -5,6 +5,10 @@ Automated daily reporting system that extracts CRM activity from Brevo, generate
 ## Features
 
 - **Automated Data Extraction**: Pulls last 24 hours of CRM activity from Brevo API (72 hours on Mondays)
+- **Intelligent Filtering**:
+  - Company-level notes only (excludes contact and deal notes)
+  - Filters out AI-generated notes automatically
+  - Differentiates new deals from updated deals based on timestamps
 - **AI-Powered Summaries**: Generates executive-level summaries using OpenAI GPT-4
 - **Teams Integration**: Delivers formatted reports via Microsoft Teams webhook
 - **Timezone-Aware**: Handles Toronto (EST/EDT) to UTC conversions automatically
@@ -15,7 +19,7 @@ Automated daily reporting system that extracts CRM activity from Brevo, generate
 ## Project Structure
 
 ```
-brevo-crm-automation/
+CRM-Automation/
 ├── DailyReportFunction/
 │   ├── __init__.py              # Main Azure Function handler
 │   └── function.json            # Timer trigger configuration
@@ -26,11 +30,23 @@ brevo-crm-automation/
 │   └── utils.py                 # Utilities (timezone, mappings, formatting)
 ├── tests/
 │   └── mock_data.json           # Sample CRM data for testing
+├── doc/                         # Documentation files
 ├── host.json                    # Azure Functions host configuration
 ├── local.settings.json          # Local environment variables
 ├── requirements.txt             # Python dependencies
 └── README.md                    # This file
 ```
+
+## Documentation
+
+For step-by-step guides and detailed setup instructions, see the [Documentation Index](doc/00_INDEX.md).
+
+Quick links:
+- [Getting Started](doc/01_START_HERE.md) - Start here for project overview
+- [Quick Start Guide](doc/02_QUICKSTART.md) - Fast setup in 15 minutes
+- [Local Testing](doc/03_TEST_LOCAL.md) - Test with mock data
+- [Client Requirements Review](doc/05_CLIENT_REQUIREMENTS_REVIEW.md) - Implementation compliance
+- [Azure Deployment](doc/06_AZURE_DEPLOYMENT.md) - Deploy to production
 
 ## Prerequisites
 
@@ -43,26 +59,49 @@ brevo-crm-automation/
 
 ## Local Development Setup
 
-### 1. Clone and Navigate to Project
+### 1. Navigate to Project Directory
 
 ```bash
-cd /Users/nataliacuellas/Desktop/Programming/CRM-Automation
+cd CRM-Automation
 ```
 
-### 2. Create Virtual Environment
+### 2. Install Python 3.11 (if needed)
+
+**Check your Python version**:
+```bash
+python3 --version
+```
+
+**If you have Python 3.9 or lower, install Python 3.11**:
+
+**macOS** (using Homebrew):
+```bash
+brew install python@3.11
+```
+
+**Windows**:
+Download from [python.org](https://www.python.org/downloads/)
+
+### 3. Create Virtual Environment
 
 ```bash
+# Use python3.11 if you just installed it
 python3.11 -m venv venv
+
+# Or use python3 if you already have 3.11+
+python3 -m venv venv
+
+# Activate the environment
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-### 3. Install Dependencies
+### 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
+### 5. Configure Environment Variables
 
 Edit [local.settings.json](local.settings.json):
 
@@ -85,7 +124,7 @@ Edit [local.settings.json](local.settings.json):
 - Set `USE_MOCK_DATA=false` to use real APIs
 - Never commit `local.settings.json` with real API keys
 
-### 5. Install Azure Functions Core Tools
+### 6. Install Azure Functions Core Tools
 
 **macOS** (using Homebrew):
 ```bash
@@ -170,6 +209,9 @@ Implemented in [shared/utils.py](shared/utils.py):
 
 **Notes**: `GET /v3/crm/notes`
 - Extracts: text, author, companyIds, createdAt
+- Filtering applied:
+  - Company-level notes only (must have companyIds, excludes contactIds and dealIds)
+  - Excludes notes ending with "Generated automatically by Aura"
 - Enriched with company details
 
 **Companies**: `GET /v3/crm/companies/{id}`
@@ -177,31 +219,17 @@ Implemented in [shared/utils.py](shared/utils.py):
 
 **Deals**: `GET /v3/crm/deals`
 - Extracts: deal_name, deal_owner, deal_stage, pipeline_id, distributor, amount, opportunity_type, timestamps
+- Differentiation logic:
+  - New deals: created_at within reporting period
+  - Updated deals: stage_updated_at within reporting period but created_at before period
 
 ### Pipeline Mappings
 
-**PACA Sales Pipeline** (`69580298dc36c3319adb3093`):
-- Identified
-- Qualifying + Assessment
-- Proposal Sent
-- In negotiation
-- On-Hold
-- Won
-- Lost
-
-**WHD Sales Pipeline** (`6849de42a68e1c112aa30e83`):
-- Identified
-- Qualifying + Assessment
-- Proposal Sent to rep
-- In negotiation
-- On-Hold
-- Won
-- Lost
+The system supports multiple sales pipelines with configurable stages. Pipeline IDs and stage IDs are mapped to human-readable names in the codebase.
 
 ### User Mappings
 
-- `6849de2c8da98f55690819b3` = Nicolas Attieh
-- `6866dcf3af9c593d0806bb57` = Marvin Escalante
+User IDs from the CRM are mapped to display names for report generation. The mapping is easily expandable to accommodate additional users as the team grows.
 
 ## Report Generation
 
@@ -209,11 +237,12 @@ Implemented in [shared/utils.py](shared/utils.py):
 
 The AI generates an executive summary with:
 - Title format: `[Day of Week], [Month] [Day], [Year] – CRM Executive Summary`
-- Organized by Owner (sales rep)
+- Organized by owner (sales representative)
 - Thematic categorization of activities
 - Action-oriented bullet points
-- New deals and deal updates sections
+- Separate sections for new deals and updated deals
 - Clickable company and deal links
+- Professional formatting suitable for executive review
 
 ### Report Format
 
@@ -436,19 +465,6 @@ curl -X POST YOUR_WEBHOOK_URL \
 - Add comprehensive error handling
 - Log important steps at INFO level
 
-### Testing Checklist
-
-- [ ] Test with mock data
-- [ ] Test with real Brevo API
-- [ ] Test with real OpenAI API
-- [ ] Test Teams webhook delivery
-- [ ] Test Monday (72-hour lookback)
-- [ ] Test Tuesday-Friday (24-hour lookback)
-- [ ] Test error scenarios (API failures)
-- [ ] Test empty data scenarios
-- [ ] Verify timezone conversions
-- [ ] Check hyperlinks in report
-
 ## Cost Considerations
 
 ### OpenAI API
@@ -483,24 +499,6 @@ curl -X POST YOUR_WEBHOOK_URL \
 - Teams message delivery confirmation
 - API rate limit warnings
 
-### Regular Maintenance
-
-- [ ] Monitor OpenAI token usage trends
-- [ ] Review error logs weekly
-- [ ] Update dependencies monthly
-- [ ] Rotate API keys quarterly
-- [ ] Test mock data accuracy
-
 ## License
 
-Proprietary - Internal Use Only
-
-## Contact
-
-For questions or issues, contact the development team.
-
----
-
-**Last Updated**: January 2026
-**Version**: 1.0.0
-# crm-automation
+Internal Use Only
