@@ -37,5 +37,5 @@ secrets.json
 # Azure
 .funcignore
 
-# Documentation (internal use only)
+# Documentation
 doc/

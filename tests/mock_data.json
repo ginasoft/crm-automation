@@ -90,9 +90,9 @@
       "distributor": "Direct",
       "amount": 450000,
       "opportunity_type": "New Business",
-      "created_at": "2026-01-09T14:45:00Z",
-      "stage_updated_at": "2026-01-09T14:45:00Z",
-      "modified_at": "2026-01-09T14:45:00Z"
+      "created_at": "2026-01-10T14:45:00Z",
+      "stage_updated_at": "2026-01-10T14:45:00Z",
+      "modified_at": "2026-01-10T14:45:00Z"
     },
     {
       "id": "deal_002",
@@ -103,9 +103,9 @@
       "distributor": "Regional Distributor",
       "amount": 125000,
       "opportunity_type": "Upsell",
-      "created_at": "2026-01-05T10:00:00Z",
-      "stage_updated_at": "2026-01-09T11:00:00Z",
-      "modified_at": "2026-01-09T11:00:00Z"
+      "created_at": "2026-01-03T10:00:00Z",
+      "stage_updated_at": "2026-01-10T11:00:00Z",
+      "modified_at": "2026-01-10T11:00:00Z"
     },
     {
       "id": "deal_003",
@@ -117,8 +117,8 @@
       "amount": 1200000,
       "opportunity_type": "Renewal",
       "created_at": "2025-12-15T09:00:00Z",
-      "stage_updated_at": "2026-01-09T17:00:00Z",
-      "modified_at": "2026-01-09T17:00:00Z"
+      "stage_updated_at": "2026-01-10T17:00:00Z",
+      "modified_at": "2026-01-10T17:00:00Z"
     },
     {
       "id": "deal_004",
@@ -129,9 +129,9 @@
       "distributor": "Direct",
       "amount": 750000,
       "opportunity_type": "New Business",
-      "created_at": "2026-01-09T11:30:00Z",
-      "stage_updated_at": "2026-01-09T11:30:00Z",
-      "modified_at": "2026-01-09T11:30:00Z"
+      "created_at": "2026-01-10T11:30:00Z",
+      "stage_updated_at": "2026-01-10T11:30:00Z",
+      "modified_at": "2026-01-10T11:30:00Z"
     },
     {
       "id": "deal_005",
@@ -142,9 +142,9 @@
       "distributor": "Retail Chain",
       "amount": 85000,
       "opportunity_type": "Recovery",
-      "created_at": "2026-01-09T09:15:00Z",
-      "stage_updated_at": "2026-01-09T09:15:00Z",
-      "modified_at": "2026-01-09T09:15:00Z"
+      "created_at": "2026-01-02T09:15:00Z",
+      "stage_updated_at": "2026-01-10T09:15:00Z",
+      "modified_at": "2026-01-10T09:15:00Z"
     },
     {
       "id": "deal_006",
@@ -155,9 +155,9 @@
       "distributor": "Direct",
       "amount": 2000000,
       "opportunity_type": "Strategic Partnership",
-      "created_at": "2026-01-09T15:45:00Z",
-      "stage_updated_at": "2026-01-09T15:45:00Z",
-      "modified_at": "2026-01-09T15:45:00Z"
+      "created_at": "2026-01-10T15:45:00Z",
+      "stage_updated_at": "2026-01-10T15:45:00Z",
+      "modified_at": "2026-01-10T15:45:00Z"
     }
   ]
 }
