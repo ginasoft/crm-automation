@@ -39,3 +39,4 @@ secrets.json
 
 # Documentation
 doc/
+.claude/
