@@ -432,7 +432,7 @@ class BrevoClient:
                     elif modified_at < start_time and created_at < start_time:
                         # Deals are sorted by date desc, so we can stop
                         logger.info("Reached deals outside time range, stopping pagination")
-                        return all_deals
+                        return self._differentiate_deals(all_deals, start_time, end_time)
 
                 offset += limit
 
