@@ -226,7 +226,11 @@ class BrevoClient:
 
             try:
                 response = self._make_request("GET", "/v3/crm/notes", params=params)
-                notes = response.get("notes", [])
+                # Handle both response formats: {"notes": [...]} or {"items": [...]} or direct list
+                if isinstance(response, list):
+                    notes = response
+                else:
+                    notes = response.get("items", response.get("notes", []))
 
                 if not notes:
                     break
@@ -373,21 +377,35 @@ class BrevoClient:
 
             try:
                 response = self._make_request("GET", "/v3/crm/deals", params=params)
-                deals = response.get("deals", [])
+                # Handle both response formats: {"deals": [...]} or {"items": [...]} or direct list
+                if isinstance(response, list):
+                    deals = response
+                else:
+                    deals = response.get("items", response.get("deals", []))
 
                 if not deals:
                     break
 
                 # Filter deals by creation or modification time
                 for deal in deals:
-                    attributes = deal.get("attributes", {})
+                    # Handle both formats: attributes nested or flat structure
+                    if "attributes" in deal:
+                        attributes = deal.get("attributes", {})
+                    else:
+                        attributes = deal  # Fields are directly on deal object
 
-                    # Parse timestamps
-                    created_at = parse_iso_datetime(attributes.get("created_at"))
-                    modified_at = attributes.get("modified_at")
+                    # Parse timestamps - try multiple field names
+                    created_at_str = attributes.get("created_at") or attributes.get("createdAt") or deal.get("createdAt")
+                    created_at = parse_iso_datetime(created_at_str) if created_at_str else None
 
-                    if modified_at:
-                        modified_at = parse_iso_datetime(modified_at)
+                    if not created_at:
+                        logger.warning(f"Deal missing created_at timestamp, skipping: {deal.get('id')}")
+                        continue
+                    # Brevo uses "last_updated_date" for modification timestamp
+                    modified_at_str = attributes.get("last_updated_date") or attributes.get("modified_at") or attributes.get("modifiedAt")
+
+                    if modified_at_str:
+                        modified_at = parse_iso_datetime(modified_at_str)
                     else:
                         modified_at = created_at
 
@@ -397,16 +415,16 @@ class BrevoClient:
 
                         deal_data = {
                             "id": deal.get("id"),
-                            "deal_name": attributes.get("deal_name", "Untitled Deal"),
+                            "deal_name": attributes.get("deal_name") or "Untitled Deal",
                             "deal_owner": attributes.get("deal_owner"),
                             "deal_stage": attributes.get("deal_stage"),
                             "pipeline_id": attributes.get("pipeline"),
                             "distributor": attributes.get("distributor"),
                             "amount": attributes.get("amount", 0),
-                            "opportunity_type": attributes.get("opportunity_type"),
-                            "created_at": attributes.get("created_at"),
+                            "opportunity_type": attributes.get("deal_type"),  # Brevo uses deal_type
+                            "created_at": created_at_str,
                             "stage_updated_at": attributes.get("stage_updated_at"),
-                            "modified_at": attributes.get("modified_at")
+                            "modified_at": modified_at_str or attributes.get("last_updated_date")
                         }
 
                         all_deals.append(deal_data)
