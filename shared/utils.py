@@ -152,16 +152,25 @@ def get_stage_name(pipeline_id: str, stage_id: str) -> str:
     return stages.get(stage_id, "Unknown Stage")
 
 
-def get_user_name(user_id: str) -> str:
+def get_user_name(user_id) -> str:
     """
     Get human-readable user name from user ID.
 
     Args:
-        user_id: Brevo user ID
+        user_id: Brevo user ID (string) or user object (dict with 'id' key)
 
     Returns:
         str: User name or the original ID if not found
     """
+    # Handle case where user_id is a dict (Brevo returns owner as object)
+    if isinstance(user_id, dict):
+        user_id = user_id.get("id", str(user_id))
+
+    # Ensure user_id is a string
+    if user_id is None:
+        return "Unknown"
+
+    user_id = str(user_id)
     return USER_MAPPINGS.get(user_id, user_id)
 
 
