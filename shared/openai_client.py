@@ -287,7 +287,7 @@ Please generate the executive summary report following all formatting requiremen
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=temperature,
-                max_tokens=4000
+                max_completion_tokens=4000
             )
 
             summary = response.choices[0].message.content
