@@ -37,17 +37,6 @@ CRM-Automation/
 └── README.md                    # This file
 ```
 
-## Documentation
-
-For step-by-step guides and detailed setup instructions, see the [Documentation Index](doc/00_INDEX.md).
-
-Quick links:
-- [Getting Started](doc/01_START_HERE.md) - Start here for project overview
-- [Quick Start Guide](doc/02_QUICKSTART.md) - Fast setup in 15 minutes
-- [Local Testing](doc/03_TEST_LOCAL.md) - Test with mock data
-- [Client Requirements Review](doc/05_CLIENT_REQUIREMENTS_REVIEW.md) - Implementation compliance
-- [Azure Deployment](doc/06_AZURE_DEPLOYMENT.md) - Deploy to production
-
 ## Prerequisites
 
 - **Python 3.11** or higher
@@ -480,24 +469,6 @@ curl -X POST YOUR_WEBHOOK_URL \
 ### Azure Functions
 - Consumption plan typically $0-$10/month for this workload
 - Monitor execution time and memory usage
-
-## Security Best Practices
-
-1. **Never commit secrets**: Use `.gitignore` for `local.settings.json`
-2. **Use Key Vault in production**: Store all secrets in Azure Key Vault
-3. **Restrict webhook access**: Secure Teams webhook URL
-4. **Monitor API usage**: Watch for unusual activity
-5. **Rotate keys regularly**: Update API keys periodically
-6. **Limit permissions**: Use minimal required permissions for Azure resources
-
-## Support and Maintenance
-
-### Logs to Review
-
-- Azure Function execution logs
-- Application Insights telemetry
-- Teams message delivery confirmation
-- API rate limit warnings
 
 ## License
 

@@ -19,10 +19,10 @@ class TeamsClient:
         Args:
             webhook_url: Teams webhook URL (if None, reads from TEAMS_WEBHOOK_URL env var)
         """
-        self.webhook_url = webhook_url or os.getenv("TEAMS_WEBHOOK_URL")
+        self.webhook_url = webhook_url or os.getenv("Teams-Webhook-URL")
 
         if not self.webhook_url:
-            raise ValueError("TEAMS_WEBHOOK_URL must be provided or set in environment")
+            raise ValueError("Teams-Webhook-URL must be provided or set in environment")
 
         logger.info("TeamsClient initialized")
 

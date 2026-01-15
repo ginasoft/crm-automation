@@ -31,10 +31,10 @@ class OpenAIClient:
             api_key: OpenAI API key (if None, reads from OPENAI_API_KEY env var)
             model: Model to use (default: gpt-4)
         """
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.api_key = api_key or os.getenv("OPENAI-API-KEY")
 
         if not self.api_key:
-            raise ValueError("OPENAI_API_KEY must be provided or set in environment")
+            raise ValueError("OPENAI-API-KEY must be provided or set in environment")
 
         self.client = OpenAI(api_key=self.api_key)
         self.model = model
