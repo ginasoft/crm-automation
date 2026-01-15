@@ -27,10 +27,10 @@ class BrevoClient:
             use_mock: If True, use mock data instead of real API calls
         """
         self.use_mock = use_mock
-        self.api_key = api_key or os.getenv("BREVO-API-KEY")
+        self.api_key = api_key or os.getenv("BREVO_API_KEY")
 
         if not self.use_mock and not self.api_key:
-            raise ValueError("BREVO-API-KEY must be provided or set in environment")
+            raise ValueError("BREVO_API_KEY must be provided or set in environment")
 
         self.headers = {
             "accept": "application/json",
