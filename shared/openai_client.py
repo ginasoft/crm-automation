@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class OpenAIClient:
     """Client for generating CRM summaries using OpenAI GPT-4."""
 
-    def __init__(self, api_key: Optional[str] = None, model: str = "gpt-4"):
+    def __init__(self, api_key: Optional[str] = None, model: str = "gpt-5"):
         """
         Initialize OpenAI client.
 
@@ -199,24 +199,29 @@ FORMATTING REQUIREMENTS:
 8. Use professional, concise language appropriate for C-level executives
 
 CONTENT ORGANIZATION:
-- Group by Owner first
+- Group by Owner first (use ## for owner name as section header)
 - Within each owner's section, organize by activity type (e.g., "New Business Development", "Client Meetings", "Deal Progress", "Strategic Initiatives")
-- Create a "New Deals Created" section showing deals created during the period
-- Create a "Deals Updated" section showing deals that progressed or changed
-- Summarize key insights or notable patterns
+- For DEALS: Always show Owner name, Deal name (with link), Stage, Amount, Distributor, and Opportunity Type
+- For NOTES: Summarize the specific content and key action items from each note - be detailed and specific about what was discussed or decided
+- Summarize key insights or notable patterns at the end
 
 OUTPUT FORMAT:
 Use markdown formatting with:
 - # for main title
-- ## for owner names
-- ### for category headings
+- ## for owner names (e.g., "## Nicolas Attieh", "## Marvin Escalante")
+- ### for category headings within each owner section
 - Bullet points for individual items
 - **Bold** for emphasis on key metrics or outcomes
+
+IMPORTANT FOR NOTES:
+- Extract and summarize the SPECIFIC content of each note
+- Include key details, action items, decisions, and next steps mentioned
+- Do NOT write generic summaries - be specific about what was discussed
 
 Do NOT include:
 - Unnecessary pleasantries or conversational language
 - Redundant information
-- Overly detailed technical notes unless business-critical
+- Generic or vague summaries that don't reflect actual note content
 """
 
     def _build_user_prompt(self, notes: List[Dict[str, Any]],
