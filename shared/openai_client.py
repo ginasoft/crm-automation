@@ -208,7 +208,7 @@ CONTENT ORGANIZATION:
 OUTPUT FORMAT:
 Use markdown formatting with:
 - # for main title
-- ## for owner names (e.g., "## Nicolas Attieh", "## Marvin Escalante")
+- ## for owner names 
 - ### for category headings within each owner section
 - Bullet points for individual items
 - **Bold** for emphasis on key metrics or outcomes
@@ -264,6 +264,7 @@ Please generate the executive summary report following all formatting requiremen
             notes: List of enriched notes with company data
             deals_data: Dict with "new_deals" and "updated_deals" keys
             temperature: Model temperature (0.0-1.0, lower = more deterministic)
+                         Note: gpt-5 model only supports temperature=1
 
         Returns:
             str: Generated markdown summary
@@ -280,15 +281,24 @@ Please generate the executive summary report following all formatting requiremen
             system_prompt = self._build_system_prompt()
             user_prompt = self._build_user_prompt(notes, deals_data)
 
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # Build request parameters
+            request_params = {
+                "model": self.model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=temperature,
-                max_completion_tokens=4000
-            )
+                "max_completion_tokens": 4000
+            }
+
+            # gpt-5 model only supports temperature=1, so we set it to 1 or omit it
+            # For other models, use the provided temperature
+            if self.model == "gpt-5":
+                request_params["temperature"] = 1.0
+            else:
+                request_params["temperature"] = temperature
+
+            response = self.client.chat.completions.create(**request_params)
 
             summary = response.choices[0].message.content
 
