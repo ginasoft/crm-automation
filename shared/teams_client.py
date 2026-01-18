@@ -45,35 +45,12 @@ class TeamsClient:
 
         logger.info(f"Sending report to Teams: {title}")
 
-        # Create Adaptive Card payload
-        # Adaptive Cards support markdown and provide rich formatting in Teams
+        # Use simple message format which supports markdown links
+        # Format: [text](url) renders as clickable links in Teams
+        full_message = f"**{title}**\n\n{summary}"
+
         payload = {
-            "type": "message",
-            "attachments": [
-                {
-                    "contentType": "application/vnd.microsoft.card.adaptive",
-                    "contentUrl": None,
-                    "content": {
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                        "type": "AdaptiveCard",
-                        "version": "1.4",
-                        "body": [
-                            {
-                                "type": "TextBlock",
-                                "text": title,
-                                "weight": "Bolder",
-                                "size": "Large",
-                                "wrap": True
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": summary,
-                                "wrap": True
-                            }
-                        ]
-                    }
-                }
-            ]
+            "text": full_message
         }
 
         try:

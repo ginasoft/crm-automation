@@ -184,44 +184,35 @@ class OpenAIClient:
         Returns:
             str: System prompt
         """
-        return """You are an executive assistant generating daily CRM summary reports for senior leadership.
+        return """You are an executive assistant generating daily CRM summary reports.
 
-Your task is to analyze CRM activity data and create a professional, concise executive summary.
+Your task is to create a brief, factual summary of CRM activity. Be concise - no fluff.
 
-FORMATTING REQUIREMENTS:
-1. Use the provided report title format exactly as given
-2. Organize all activities by Owner (sales rep name)
-3. For each owner, categorize their activities thematically with clear section headings
-4. Use action-oriented bullet points (no narrative-style prose)
-5. Preserve all markdown hyperlinks for companies and deals exactly as provided
-6. Include all relevant attributes (distributor, business division, industry, pipeline, stage, amount, etc.)
-7. Make the report easily scannable with clear hierarchy
-8. Use professional, concise language appropriate for C-level executives
+FORMATTING:
+1. Use the provided report title exactly as given
+2. Group by Owner (sales rep name) using ## headers
+3. Under each owner, list their activities as bullet points
+4. Preserve all markdown hyperlinks exactly as provided
 
-CONTENT ORGANIZATION:
-- Group by Owner first (use ## for owner name as section header)
-- Within each owner's section, organize by activity type (e.g., "New Business Development", "Client Meetings", "Deal Progress", "Strategic Initiatives")
-- For DEALS: Always show Owner name, Deal name (with link), Stage, Amount, Distributor, and Opportunity Type
-- For NOTES: Summarize the specific content and key action items from each note - be detailed and specific about what was discussed or decided
-- Summarize key insights or notable patterns at the end
+FOR NOTES:
+- One bullet per note with the company name and a brief summary of what was discussed
+- Include specific action items if mentioned
+
+FOR DEALS:
+- One bullet per deal: Deal name (with link), Stage, Amount, Distributor
 
 OUTPUT FORMAT:
-Use markdown formatting with:
 - # for main title
-- ## for owner names 
-- ### for category headings within each owner section
-- Bullet points for individual items
-- **Bold** for emphasis on key metrics or outcomes
+- ## for owner names
+- Bullet points for items
+- **Bold** only for amounts
 
-IMPORTANT FOR NOTES:
-- Extract and summarize the SPECIFIC content of each note
-- Include key details, action items, decisions, and next steps mentioned
-- Do NOT write generic summaries - be specific about what was discussed
-
-Do NOT include:
-- Unnecessary pleasantries or conversational language
+DO NOT include:
+- "Key Insights" or "Summary" sections
+- Analysis or commentary
 - Redundant information
-- Generic or vague summaries that don't reflect actual note content
+- Generic filler text
+- Section headers like "Client Outreach", "Deal Progress", etc. - just list the items directly
 """
 
     def _build_user_prompt(self, notes: List[Dict[str, Any]],
@@ -280,6 +271,13 @@ Please generate the executive summary report following all formatting requiremen
         try:
             system_prompt = self._build_system_prompt()
             user_prompt = self._build_user_prompt(notes, deals_data)
+
+            # Log the data being sent to AI for debugging
+            logger.info("=" * 60)
+            logger.info("DATA BEING SENT TO AI:")
+            logger.info("=" * 60)
+            logger.info(f"USER PROMPT:\n{user_prompt}")
+            logger.info("=" * 60)
 
             # Build request parameters
             request_params = {

@@ -1,6 +1,6 @@
 # Brevo CRM Daily Automation
 
-Automated daily reporting system that extracts CRM activity from Brevo, generates AI-powered executive summaries using OpenAI GPT-4, and delivers formatted reports to Microsoft Teams.
+Automated daily reporting system that extracts CRM activity from Brevo, generates AI-powered executive summaries using OpenAI GPT-5, and delivers formatted reports to Microsoft Teams.
 
 ## Features
 
@@ -9,7 +9,7 @@ Automated daily reporting system that extracts CRM activity from Brevo, generate
   - Company-level notes only (excludes contact and deal notes)
   - Filters out AI-generated notes automatically
   - Differentiates new deals from updated deals based on timestamps
-- **AI-Powered Summaries**: Generates executive-level summaries using OpenAI GPT-4
+- **AI-Powered Summaries**: Generates executive-level summaries using OpenAI GPT-5
 - **Teams Integration**: Delivers formatted reports via Microsoft Teams webhook
 - **Timezone-Aware**: Handles Toronto (EST/EDT) to UTC conversions automatically
 - **Mock Data Support**: Test locally without hitting real APIs
@@ -32,7 +32,8 @@ CRM-Automation/
 │   └── mock_data.json           # Sample CRM data for testing
 ├── doc/                         # Documentation files
 ├── host.json                    # Azure Functions host configuration
-├── local.settings.json          # Local environment variables
+├── local.settings.json          # Local environment variables (create from template)
+├── local.settings.template.json # Template for local settings
 ├── requirements.txt             # Python dependencies
 └── README.md                    # This file
 ```
@@ -92,26 +93,33 @@ pip install -r requirements.txt
 
 ### 5. Configure Environment Variables
 
-Edit [local.settings.json](local.settings.json):
+Copy the template file and rename it:
+
+```bash
+cp local.settings.template.json local.settings.json
+```
+
+Then edit `local.settings.json` with your actual API keys:
 
 ```json
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "BREVO_API_KEY": "your-actual-brevo-api-key",
     "OPENAI_API_KEY": "your-actual-openai-api-key",
     "TEAMS_WEBHOOK_URL": "your-actual-teams-webhook-url",
-    "USE_MOCK_DATA": "true"
+    "USE_MOCK_DATA": "false"
   }
 }
 ```
 
 **Important**:
-- Set `USE_MOCK_DATA=true` to test with mock data
-- Set `USE_MOCK_DATA=false` to use real APIs
-- Never commit `local.settings.json` with real API keys
+- Set `USE_MOCK_DATA=true` to test with sample mock data (no API keys needed for Brevo)
+- Set `USE_MOCK_DATA=false` to use real Brevo data
+- `local.settings.json` is in `.gitignore` - your API keys won't be pushed to GitHub
+- `TEAMS_WEBHOOK_URL` is not used when running `test_local.py`
 
 ### 6. Install Azure Functions Core Tools
 
@@ -133,9 +141,33 @@ npm install -g azure-functions-core-tools@4
 
 ## Testing Locally
 
-### Test with Mock Data
+### Quick Test (Recommended)
 
-1. Ensure `USE_MOCK_DATA=true` in [local.settings.json](local.settings.json)
+Use `test_local.py` to test the full flow without sending to Teams:
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run the test
+python test_local.py
+```
+
+This script:
+- Fetches data from Brevo (real or mock depending on `USE_MOCK_DATA`)
+- Generates the AI summary
+- Displays everything in the console (does NOT send to Teams)
+
+**Customize the test**: Edit line 37 in `test_local.py` to change `DAYS_BACK`:
+```python
+DAYS_BACK = 3  # Number of days to look back for data
+```
+
+**Note**: In production, the system uses 24 hours (or 72 hours on Mondays). For testing, you can set any number of days.
+
+### Test with Azure Functions Runtime
+
+1. Ensure your settings are configured in `local.settings.json`
 2. Start the function locally:
 
 ```bash
@@ -149,11 +181,7 @@ func start
 curl -X POST http://localhost:7071/admin/functions/DailyReportFunction -H "Content-Type: application/json" -d "{}"
 ```
 
-### Test with Real APIs
-
-1. Update [local.settings.json](local.settings.json) with real API keys
-2. Set `USE_MOCK_DATA=false`
-3. Start and trigger the function as above
+**Warning**: This will send the report to Teams if you have a real webhook URL configured.
 
 **Note**: When testing with real APIs, be mindful of API rate limits and costs (especially OpenAI).
 
@@ -203,7 +231,7 @@ Implemented in [shared/utils.py](shared/utils.py):
   - Excludes notes ending with "Generated automatically by Aura"
 - Enriched with company details
 
-**Companies**: `GET /v3/crm/companies/{id}`
+**Companies**: `GET /v3/companies/{id}`
 - Extracts: name, distributor, business_division, industry
 
 **Deals**: `GET /v3/crm/deals`
@@ -222,7 +250,7 @@ User IDs from the CRM are mapped to display names for report generation. The map
 
 ## Report Generation
 
-### OpenAI GPT-4 Summary
+### OpenAI GPT-5 Summary
 
 The AI generates an executive summary with:
 - Title format: `[Day of Week], [Month] [Day], [Year] – CRM Executive Summary`
@@ -235,7 +263,7 @@ The AI generates an executive summary with:
 
 ### Report Format
 
-Reports are sent as Microsoft Teams Adaptive Cards with markdown formatting:
+Reports are sent to Microsoft Teams with markdown formatting (clickable links supported):
 - Hyperlinked company names → `https://app.brevo.com/companies/detail/{id}`
 - Hyperlinked deal names → `https://app.brevo.com/crm/deals/detail/{id}`
 - Professional formatting suitable for executives
@@ -358,12 +386,22 @@ def format_report_title() -> str:
 
 ### Adjust OpenAI Prompt
 
-Edit [shared/openai_client.py](shared/openai_client.py):
+Edit [shared/openai_client.py](shared/openai_client.py) (lines 187-216):
 
 ```python
 def _build_system_prompt(self) -> str:
     return """Your custom prompt here..."""
 ```
+
+### Change OpenAI Model
+
+Edit [shared/openai_client.py](shared/openai_client.py) (line 26):
+
+```python
+def __init__(self, api_key: Optional[str] = None, model: str = "gpt-5"):
+```
+
+Available models: `gpt-5`, `gpt-4`, `gpt-4-turbo`, `gpt-3.5-turbo`
 
 ### Change Schedule
 
@@ -414,7 +452,7 @@ USER_MAPPINGS = {
 ### OpenAI Errors
 
 1. Check API key validity
-2. Verify model name (currently "gpt-4")
+2. Verify model name (currently "gpt-5" - can be changed in `shared/openai_client.py` line 26)
 3. Monitor token usage (max 4000 tokens)
 4. Check OpenAI account credits/billing
 
@@ -457,7 +495,7 @@ curl -X POST YOUR_WEBHOOK_URL \
 ## Cost Considerations
 
 ### OpenAI API
-- GPT-4 costs approximately $0.03 per 1K prompt tokens and $0.06 per 1K completion tokens
+- GPT-5 pricing varies - check OpenAI's current pricing
 - Estimated cost per report: $0.20-$0.50 (varies by data volume)
 - Monthly cost (20 business days): $4-$10
 

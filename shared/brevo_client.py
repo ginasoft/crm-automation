@@ -297,7 +297,7 @@ class BrevoClient:
         logger.debug(f"Fetching company {company_id}")
 
         try:
-            response = self._make_request("GET", f"/v3/crm/companies/{company_id}")
+            response = self._make_request("GET", f"/v3/companies/{company_id}")
 
             # Extract relevant attributes
             attributes = response.get("attributes", {})
