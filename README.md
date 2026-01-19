@@ -1,6 +1,6 @@
 # Brevo CRM Daily Automation
 
-Automated daily reporting system that extracts CRM activity from Brevo, generates AI-powered executive summaries using OpenAI GPT-5, and delivers formatted reports to Microsoft Teams.
+Automated daily reporting system that extracts CRM activity from Brevo, generates AI-powered executive summaries using OpenAI model, and delivers formatted reports to Microsoft Teams.
 
 ## Features
 
@@ -9,7 +9,7 @@ Automated daily reporting system that extracts CRM activity from Brevo, generate
   - Company-level notes only (excludes contact and deal notes)
   - Filters out AI-generated notes automatically
   - Differentiates new deals from updated deals based on timestamps
-- **AI-Powered Summaries**: Generates executive-level summaries using OpenAI GPT-5
+- **AI-Powered Summaries**: Generates executive-level summaries using OpenAI models
 - **Teams Integration**: Delivers formatted reports via Microsoft Teams webhook
 - **Timezone-Aware**: Handles Toronto (EST/EDT) to UTC conversions automatically
 - **Mock Data Support**: Test locally without hitting real APIs
@@ -25,7 +25,7 @@ CRM-Automation/
 │   └── function.json            # Timer trigger configuration
 ├── shared/
 │   ├── brevo_client.py          # Brevo API integration
-│   ├── openai_client.py         # OpenAI GPT-4 integration
+│   ├── openai_client.py         # OpenAI integration
 │   ├── teams_client.py          # Microsoft Teams webhook
 │   └── utils.py                 # Utilities (timezone, mappings, formatting)
 ├── tests/
@@ -250,7 +250,7 @@ User IDs from the CRM are mapped to display names for report generation. The map
 
 ## Report Generation
 
-### OpenAI GPT-5 Summary
+### OpenAI GPT Summary
 
 The AI generates an executive summary with:
 - Title format: `[Day of Week], [Month] [Day], [Year] – CRM Executive Summary`
@@ -433,81 +433,3 @@ USER_MAPPINGS = {
     "user-id": "User Name"
 }
 ```
-
-## Troubleshooting
-
-### Function Not Triggering
-
-1. Check timer trigger configuration in [function.json](DailyReportFunction/function.json)
-2. Verify Function App is running (Azure Portal)
-3. Check timezone conversion in [utils.py](shared/utils.py)
-
-### API Connection Errors
-
-1. Verify API keys in [local.settings.json](local.settings.json) or Azure settings
-2. Check network connectivity
-3. Verify Brevo API endpoint URLs
-4. Review API rate limits
-
-### OpenAI Errors
-
-1. Check API key validity
-2. Verify model name (currently "gpt-5" - can be changed in `shared/openai_client.py` line 26)
-3. Monitor token usage (max 4000 tokens)
-4. Check OpenAI account credits/billing
-
-### Teams Webhook Not Receiving
-
-1. Verify webhook URL is correct
-2. Test webhook with simple message:
-```bash
-curl -X POST YOUR_WEBHOOK_URL \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Test message"}'
-```
-3. Check Teams channel permissions
-
-### Mock Data Not Loading
-
-1. Verify [tests/mock_data.json](tests/mock_data.json) exists
-2. Check JSON syntax is valid
-3. Ensure `USE_MOCK_DATA=true` in settings
-
-## Development Notes
-
-### Adding New Features
-
-1. Create feature branch
-2. Update relevant modules in [shared/](shared/)
-3. Update [mock_data.json](tests/mock_data.json) if needed
-4. Test locally with mock data
-5. Test with real APIs (carefully)
-6. Update this README
-
-### Code Style
-
-- Follow PEP 8 conventions
-- Use type hints
-- Include docstrings for all functions
-- Add comprehensive error handling
-- Log important steps at INFO level
-
-## Cost Considerations
-
-### OpenAI API
-- GPT-5 pricing varies - check OpenAI's current pricing
-- Estimated cost per report: $0.20-$0.50 (varies by data volume)
-- Monthly cost (20 business days): $4-$10
-
-### Brevo API
-- Check your Brevo plan for API call limits
-- Function makes: ~1 notes request + N company requests + ~1 deals request
-- Stay within your plan's limits
-
-### Azure Functions
-- Consumption plan typically $0-$10/month for this workload
-- Monitor execution time and memory usage
-
-## License
-
-Internal Use Only

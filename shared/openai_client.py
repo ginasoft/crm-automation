@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAIClient:
-    """Client for generating CRM summaries using OpenAI GPT-4."""
 
     def __init__(self, api_key: Optional[str] = None, model: str = "gpt-5"):
         """
@@ -29,7 +28,7 @@ class OpenAIClient:
 
         Args:
             api_key: OpenAI API key (if None, reads from OPENAI_API_KEY env var)
-            model: Model to use (default: gpt-4)
+            model: Model to use 
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
 

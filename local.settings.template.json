@@ -5,7 +5,6 @@
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "BREVO_API_KEY": "your-brevo-api-key-here",
     "OPENAI_API_KEY": "your-openai-api-key-here",
-    "TEAMS_WEBHOOK_URL": "your-teams-webhook-url-here",
     "USE_MOCK_DATA": "false"
   }
 }
