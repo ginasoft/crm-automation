@@ -9,6 +9,7 @@ bin/
 lib/
 lib64/
 .azure/
+.vscode/
 
 # Virtual Environment
 venv/
