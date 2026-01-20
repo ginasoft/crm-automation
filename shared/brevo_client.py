@@ -276,7 +276,7 @@ class BrevoClient:
                 - id: Company ID
                 - name: Company name
                 - distributor: Distribution channel
-                - business_division: Business unit
+                - business_division: Business unit (from business_division_2 attribute in Brevo)
                 - industry: Industry classification
             Returns None if company not found.
 
@@ -306,7 +306,7 @@ class BrevoClient:
                 "id": response.get("id"),
                 "name": attributes.get("name", "Unknown Company"),
                 "distributor": attributes.get("distributor"),
-                "business_division": attributes.get("business_division"),
+                "business_division": attributes.get("business_division_2"),
                 "industry": attributes.get("industry")
             }
 

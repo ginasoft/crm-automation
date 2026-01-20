@@ -232,7 +232,7 @@ Implemented in [shared/utils.py](shared/utils.py):
 - Enriched with company details
 
 **Companies**: `GET /v3/companies/{id}`
-- Extracts: name, distributor, business_division, industry
+- Extracts: name, distributor, business_division_2, industry
 
 **Deals**: `GET /v3/crm/deals`
 - Extracts: deal_name, deal_owner, deal_stage, pipeline_id, distributor, amount, opportunity_type, timestamps

@@ -48,35 +48,35 @@
       "id": "company_001",
       "name": "Acme Industrial Supply Co.",
       "distributor": "Direct",
-      "business_division": "Industrial Equipment",
+      "business_division_2": "Industrial Equipment",
       "industry": "Manufacturing"
     },
     {
       "id": "company_002",
       "name": "Pacific Logistics Partners",
       "distributor": "Regional Distributor",
-      "business_division": "Logistics & Supply Chain",
+      "business_division_2": "Logistics & Supply Chain",
       "industry": "Transportation"
     },
     {
       "id": "company_003",
       "name": "Global Automotive Components Inc.",
       "distributor": "National Distributor",
-      "business_division": "Automotive Parts",
+      "business_division_2": "Automotive Parts",
       "industry": "Automotive"
     },
     {
       "id": "company_004",
       "name": "Midwest Manufacturing Solutions",
       "distributor": "Direct",
-      "business_division": "Industrial Equipment",
+      "business_division_2": "Industrial Equipment",
       "industry": "Manufacturing"
     },
     {
       "id": "company_005",
       "name": "Coastal Retail Group",
       "distributor": "Retail Chain",
-      "business_division": "Consumer Products",
+      "business_division_2": "Consumer Products",
       "industry": "Retail"
     }
   ],
