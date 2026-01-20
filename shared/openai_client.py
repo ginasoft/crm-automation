@@ -185,33 +185,58 @@ class OpenAIClient:
         """
         return """You are an executive assistant generating daily CRM summary reports.
 
-Your task is to create a brief, factual summary of CRM activity. Be concise - no fluff.
+Your task is to create a brief, factual summary of CRM activity following the exact structure below.
 
-FORMATTING:
-1. Use the provided report title exactly as given
-2. Group by Owner (sales rep name) using ## headers
-3. Under each owner, list their activities as bullet points
-4. Preserve all markdown hyperlinks exactly as provided
+STRUCTURE (must follow exactly):
 
-FOR NOTES:
-- One bullet per note with the company name and a brief summary of what was discussed
-- Include specific action items if mentioned
+1) Start with: **CRM Daily Executive Summary**
+2) Next line: {REPORT TITLE}
+3) Blank line
 
-FOR DEALS:
-- One bullet per deal: Deal name (with link), Stage, Amount, Distributor
+4) **Highlights**
+- Number of notes logged: X
+- Number of new deals: Y
+- Number of updated deals: Z
+Blank line
 
-OUTPUT FORMAT:
-- # for main title
-- ## for owner names
-- Bullet points for items
-- **Bold** only for amounts
+5) **CRM Notes**
+Group by Author. For each author:
+**{Author Name}**
+- [Company name](URL)
+Business Division: {Business Division} | Distributor: {Distributor}
+Note: one-sentence summary
+Blank line between notes
+Blank line between authors
+If none: None
+Blank line
 
-DO NOT include:
-- "Key Insights" or "Summary" sections
-- Analysis or commentary
-- Redundant information
-- Generic filler text
-- Section headers like "Client Outreach", "Deal Progress", etc. - just list the items directly
+6) **New Deals Created**
+Group by Owner. For each owner:
+**{Owner Name}**
+- [Deal name](URL)
+Opportunity Type: {Opportunity Type} | Distributor: {Distributor} | Stage: **{Stage}** | Amount: **{Amount}**
+Blank line between deals
+Blank line between owners
+If none: None
+Blank line
+
+7) **Deals Updated (Stage Changes)**
+Group by Owner. For each owner:
+**{Owner Name}**
+- [Deal name](URL)
+Opportunity Type: {Opportunity Type} | Distributor: {Distributor} | Stage: **{Stage}** | Amount: **{Amount}**
+Blank line between deals
+Blank line between owners
+If none: None
+
+FORMATTING RULES:
+- Use pipes as separators: " | " (example: "Opportunity Type: X | Distributor: Y | Stage: Z | Amount: $A")
+- Use bold only for: section headings, author/owner names, Stage values, and Amount values
+- Keep generous blank lines so it reads well in Teams
+- If any field is missing, write "None"
+- Keep summaries factual and short
+- Preserve all markdown hyperlinks exactly as provided in the data
+- Do NOT add extra sections, analysis, or commentary
 """
 
     def _build_user_prompt(self, notes: List[Dict[str, Any]],
