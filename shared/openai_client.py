@@ -157,6 +157,7 @@ class OpenAIClient:
                 stage_name = get_stage_name(pipeline_id, stage_id)
                 amount = format_currency(deal.get("amount", 0))
                 distributor = deal.get("distributor", "N/A")
+                opportunity_type = deal.get("opportunity_type", "N/A")
                 stage_updated_at = deal.get("stage_updated_at", "N/A")
 
                 deal_link = format_deal_link(deal_id, deal_name)
@@ -169,6 +170,7 @@ class OpenAIClient:
                     f"  Current Stage: {stage_name}\n"
                     f"  Amount: {amount}\n"
                     f"  Distributor: {distributor}\n"
+                    f"  Opportunity Type: {opportunity_type}\n"
                     f"  Stage Updated: {stage_updated_at}\n"
                 )
 
