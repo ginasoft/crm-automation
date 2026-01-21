@@ -413,6 +413,9 @@ class BrevoClient:
                     if (start_time <= created_at <= end_time) or \
                        (start_time <= modified_at <= end_time):
 
+                        # Extract deal_type from Brevo attributes
+                        deal_type_value = attributes.get("deal_type")
+                        
                         deal_data = {
                             "id": deal.get("id"),
                             "deal_name": attributes.get("deal_name") or "Untitled Deal",
@@ -421,7 +424,8 @@ class BrevoClient:
                             "pipeline_id": attributes.get("pipeline"),
                             "distributor": attributes.get("distributor"),
                             "amount": attributes.get("amount", 0),
-                            "opportunity_type": attributes.get("deal_type"),  # Brevo uses deal_type
+                            "deal_type": deal_type_value,  # Store deal_type directly (Brevo attribute name)
+                            "opportunity_type": deal_type_value,  # Also store as opportunity_type for backward compatibility
                             "created_at": created_at_str,
                             "stage_updated_at": attributes.get("stage_updated_at"),
                             "modified_at": modified_at_str or attributes.get("last_updated_date")

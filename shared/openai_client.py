@@ -14,7 +14,9 @@ from .utils import (
     get_stage_name,
     format_company_link,
     format_deal_link,
-    format_currency
+    format_currency,
+    format_note_for_display,
+    format_deal_for_display
 )
 
 logger = logging.getLogger(__name__)
@@ -43,6 +45,7 @@ class OpenAIClient:
     def _prepare_notes_context(self, notes: List[Dict[str, Any]]) -> str:
         """
         Prepare notes data as formatted text for the prompt.
+        Applies display formatting to convert raw API keys to display names.
 
         Args:
             notes: List of enriched notes with company data
@@ -56,12 +59,15 @@ class OpenAIClient:
         context_parts = []
 
         for i, note in enumerate(notes, 1):
-            author = get_user_name(note.get("author", "Unknown"))
-            text = note.get("text", "No content")
-            created_at = note.get("createdAt", "Unknown date")
+            # Format note to convert raw API keys to display names
+            formatted_note = format_note_for_display(note)
+            
+            author = get_user_name(formatted_note.get("author", "Unknown"))
+            text = formatted_note.get("text", "No content")
+            created_at = formatted_note.get("createdAt", "Unknown date")
 
-            # Get company information
-            companies = note.get("companies", [])
+            # Get company information (already formatted)
+            companies = formatted_note.get("companies", [])
             company_info = []
 
             for company in companies:
@@ -97,6 +103,7 @@ class OpenAIClient:
     def _prepare_deals_context(self, deals_data: Dict[str, List[Dict[str, Any]]]) -> str:
         """
         Prepare deals data as formatted text for the prompt.
+        Applies display formatting to convert raw API keys to display names.
 
         Args:
             deals_data: Dict with "new_deals" and "updated_deals" keys
@@ -116,17 +123,21 @@ class OpenAIClient:
         if new_deals:
             context_parts.append("=== NEW DEALS CREATED ===\n")
             for i, deal in enumerate(new_deals, 1):
-                deal_name = deal.get("deal_name", "Untitled Deal")
-                deal_id = deal.get("id", "")
-                owner = get_user_name(deal.get("deal_owner", "Unknown"))
-                pipeline_id = deal.get("pipeline_id", "")
+                # Format deal to convert raw API keys to display names
+                formatted_deal = format_deal_for_display(deal)
+                
+                deal_name = formatted_deal.get("deal_name", "Untitled Deal")
+                deal_id = formatted_deal.get("id", "")
+                owner = get_user_name(formatted_deal.get("deal_owner", "Unknown"))
+                pipeline_id = formatted_deal.get("pipeline_id", "")
                 pipeline_name = get_pipeline_name(pipeline_id)
-                stage_id = deal.get("deal_stage", "")
+                stage_id = formatted_deal.get("deal_stage", "")
                 stage_name = get_stage_name(pipeline_id, stage_id)
-                amount = format_currency(deal.get("amount", 0))
-                distributor = deal.get("distributor", "N/A")
-                opportunity_type = deal.get("opportunity_type", "N/A")
-                created_at = deal.get("created_at", "Unknown")
+                amount = format_currency(formatted_deal.get("amount", 0))
+                distributor = formatted_deal.get("distributor", "N/A")
+                # Check both deal_type and opportunity_type (Brevo uses deal_type)
+                opportunity_type = formatted_deal.get("deal_type") or formatted_deal.get("opportunity_type", "N/A")
+                created_at = formatted_deal.get("created_at", "Unknown")
 
                 deal_link = format_deal_link(deal_id, deal_name)
 
@@ -148,17 +159,22 @@ class OpenAIClient:
         if updated_deals:
             context_parts.append("\n=== DEALS UPDATED (Stage Changes) ===\n")
             for i, deal in enumerate(updated_deals, 1):
-                deal_name = deal.get("deal_name", "Untitled Deal")
-                deal_id = deal.get("id", "")
-                owner = get_user_name(deal.get("deal_owner", "Unknown"))
-                pipeline_id = deal.get("pipeline_id", "")
+                # Format deal to convert raw API keys to display names
+                formatted_deal = format_deal_for_display(deal)
+                
+                deal_name = formatted_deal.get("deal_name", "Untitled Deal")
+                deal_id = formatted_deal.get("id", "")
+                owner = get_user_name(formatted_deal.get("deal_owner", "Unknown"))
+                pipeline_id = formatted_deal.get("pipeline_id", "")
                 pipeline_name = get_pipeline_name(pipeline_id)
-                stage_id = deal.get("deal_stage", "")
+                stage_id = formatted_deal.get("deal_stage", "")
                 stage_name = get_stage_name(pipeline_id, stage_id)
-                amount = format_currency(deal.get("amount", 0))
-                distributor = deal.get("distributor", "N/A")
-                opportunity_type = deal.get("opportunity_type", "N/A")
-                stage_updated_at = deal.get("stage_updated_at", "N/A")
+                amount = format_currency(formatted_deal.get("amount", 0))
+                distributor = formatted_deal.get("distributor", "N/A")
+                # Check both deal_type and opportunity_type (Brevo uses deal_type)
+                # This fixes the issue where deal_type was not being passed to updated deals
+                opportunity_type = formatted_deal.get("deal_type") or formatted_deal.get("opportunity_type", "N/A")
+                stage_updated_at = formatted_deal.get("stage_updated_at", "N/A")
 
                 deal_link = format_deal_link(deal_id, deal_name)
 
@@ -187,58 +203,90 @@ class OpenAIClient:
         """
         return """You are an executive assistant generating daily CRM summary reports.
 
-Your task is to create a brief, factual summary of CRM activity following the exact structure below.
+
+
+Create a brief, factual summary of CRM activity following the exact structure and formatting below. This will be posted in Microsoft Teams (including mobile). Readability is critical.
 
 STRUCTURE (must follow exactly):
 
-1) Start with: **CRM Daily Executive Summary**
-2) Next line: {REPORT TITLE}
+1) First line: CRM Daily Executive Summary
+2) Second line: {REPORT TITLE}
 3) Blank line
 
-4) **Highlights**
-- Number of notes logged: X
-- Number of new deals: Y
-- Number of updated deals: Z
+4) Highlights
+- Notes: X
+- New deals: Y
+- Updated deals: Z
 Blank line
 
-5) **CRM Notes**
+5) CRM Notes
 Group by Author. For each author:
-**{Author Name}**
+{Author Name}
+Blank line
+
+For each note (repeat as needed):
 - [Company name](URL)
-Business Division: {Business Division} | Distributor: {Distributor}
-Note: one-sentence summary
+Business Division: {Business Division}
+Distributor: {Distributor}
+Note: {Note summary}
+
 Blank line between notes
 Blank line between authors
 If none: None
 Blank line
 
-6) **New Deals Created**
+6) New Deals
 Group by Owner. For each owner:
-**{Owner Name}**
+{Owner Name}
+Blank line
+
+For each deal (repeat as needed):
 - [Deal name](URL)
-Opportunity Type: {Opportunity Type} | Distributor: {Distributor} | Stage: **{Stage}** | Amount: **{Amount}**
+Deal Type: {Deal Type}
+Distributor: {Distributor}
+Stage: {Stage}
+Amount: {Amount}
+
 Blank line between deals
 Blank line between owners
 If none: None
 Blank line
 
-7) **Deals Updated (Stage Changes)**
+7) Updated Deals
 Group by Owner. For each owner:
-**{Owner Name}**
+{Owner Name}
+Blank line
+
+For each deal (repeat as needed):
 - [Deal name](URL)
-Opportunity Type: {Opportunity Type} | Distributor: {Distributor} | Stage: **{Stage}** | Amount: **{Amount}**
+Deal Type: {Deal Type}
+Distributor: {Distributor}
+Stage: {Stage}
+Amount: {Amount}
+
 Blank line between deals
 Blank line between owners
 If none: None
 
-FORMATTING RULES:
-- Use pipes as separators: " | " (example: "Opportunity Type: X | Distributor: Y | Stage: Z | Amount: $A")
-- Use bold only for: section headings, author/owner names, Stage values, and Amount values
-- Keep generous blank lines so it reads well in Teams
-- If any field is missing, write "None"
-- Keep summaries factual and short
+FORMATTING RULES (must follow exactly):
+- Output the header line CRM Daily Executive Summary only once. Do not repeat it.
+- A "blank line" means one empty line (two newline characters in a row).
+- Bullets must start at the beginning of the line with "- " (no leading spaces)
+- Attribute lines must be on their own lines and indented by exactly two spaces
+- After every author/owner line, include exactly one blank line before the first bullet
+- Never put a section heading and a name on the same line
+- The line containing a markdown link must contain ONLY the link and must end immediately after the closing ")". No extra characters after the link. No period, comma, colon, dash, or trailing spaces.
 - Preserve all markdown hyperlinks exactly as provided in the data
-- Do NOT add extra sections, analysis, or commentary
+- Bold only for: section headings, author/owner names, Stage values, Amount values
+- If any field is missing, write "None"
+- Note summaries must be factual and short
+
+EXAMPLE OF REQUIRED ITEM FORMATTING (spacing matters exactly):
+- [Example Deal](URL)
+Deal Type: Reactivation
+Distributor: Wurth Canada
+Stage: Identified
+Amount: $0.00
 """
 
     def _build_user_prompt(self, notes: List[Dict[str, Any]],

@@ -2,7 +2,7 @@
 Utility functions for timezone conversion and data mapping.
 """
 from datetime import datetime, timedelta
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any, Optional
 import pytz
 import logging
 
@@ -44,6 +44,32 @@ PIPELINE_MAPPINGS = {
 USER_MAPPINGS = {
     "6849de2c8da98f55690819b3": "Nicolas Attieh",
     "6866dcf3af9c593d0806bb57": "Marvin Escalante"
+}
+
+# Display name mappings for raw API values
+DISTRIBUTOR_DISPLAY_MAP = {
+    "w_rth_canada": "Wurth Canada",
+    "lawson_products": "Lawson Products",
+    "fastenal_canada": "Fastenal Canada",
+    "pr__distribution": "PR. Distribution",
+    "agco": "AGCO",
+    "brakequip": "Brakequip",
+    "hansen": "Hansen",
+    "kent_automotive": "Kent Automotive",
+    "motion": "Motion",
+    "msc": "MSC",
+    "napa_jobber": "NAPA JOBBER",
+    "paccar": "PACCAR",
+    "uap": "UAP",
+    "uni_direct": "UNI Direct",
+    "us_direct_ship": "US Direct Ship",
+    "vipar": "VIPAR",
+    "independent": "Independent",
+}
+
+BUSINESS_DIVISION_DISPLAY_MAP = {
+    "whd": "WHD",
+    "paca": "PACA",
 }
 
 
@@ -259,3 +285,86 @@ def parse_iso_datetime(iso_string: str) -> datetime:
     except Exception as e:
         logger.error(f"Error parsing datetime '{iso_string}': {e}")
         raise
+
+
+def format_distributor_display(raw_value: Optional[str]) -> str:
+    """
+    Format raw distributor API value to display name.
+
+    Args:
+        raw_value: Raw distributor value from API (e.g., "w_rth_canada") or None
+
+    Returns:
+        str: Display name (e.g., "Wurth Canada") or original value if not found
+    """
+    if not raw_value:
+        return "N/A"
+    return DISTRIBUTOR_DISPLAY_MAP.get(raw_value, raw_value)
+
+
+def format_business_division_display(raw_value: Optional[str]) -> str:
+    """
+    Format raw business division API value to display name.
+
+    Args:
+        raw_value: Raw business division value from API (e.g., "whd") or None
+
+    Returns:
+        str: Display name (e.g., "WHD") or original value if not found
+    """
+    if not raw_value:
+        return "N/A"
+    return BUSINESS_DIVISION_DISPLAY_MAP.get(raw_value, raw_value)
+
+
+def format_note_for_display(note: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Format note data by converting raw API keys to display names.
+    Formats: business_division_2 and distributor in company info.
+
+    Args:
+        note: Note dictionary with company information
+
+    Returns:
+        Dict: Note with formatted display values
+    """
+    formatted_note = note.copy()
+    
+    # Format company information
+    companies = formatted_note.get("companies", [])
+    for company in companies:
+        # Format business_division_2 (stored as business_division in company dict)
+        if "business_division" in company:
+            company["business_division"] = format_business_division_display(
+                company["business_division"]
+            )
+        
+        # Format distributor
+        if "distributor" in company:
+            company["distributor"] = format_distributor_display(
+                company["distributor"]
+            )
+    
+    return formatted_note
+
+
+def format_deal_for_display(deal: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Format deal data by converting raw API keys to display names.
+    Formats: distributor only.
+
+    Args:
+        deal: Deal dictionary
+
+    Returns:
+        Dict: Deal with formatted display values
+    """
+    formatted_deal = deal.copy()
+    
+    # Format distributor
+    if "distributor" in formatted_deal:
+        formatted_deal["distributor"] = format_distributor_display(
+            formatted_deal["distributor"]
+        )
+    
+    return formatted_deal
