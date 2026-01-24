@@ -409,13 +409,22 @@ class BrevoClient:
                     else:
                         modified_at = created_at
 
-                    # Include if created or modified in time range
-                    if (start_time <= created_at <= end_time) or \
-                       (start_time <= modified_at <= end_time):
+                    # Parse stage_updated_at for filtering
+                    stage_updated_at_str = attributes.get("stage_updated_at")
+                    stage_updated_at = parse_iso_datetime(stage_updated_at_str) if stage_updated_at_str else None
 
+                    # Include if created, modified, or stage updated in time range
+                    # This ensures we capture both new deals AND deals with stage changes
+                    in_time_range = (
+                        (start_time <= created_at <= end_time) or
+                        (start_time <= modified_at <= end_time) or
+                        (stage_updated_at and start_time <= stage_updated_at <= end_time)
+                    )
+
+                    if in_time_range:
                         # Extract deal_type from Brevo attributes
                         deal_type_value = attributes.get("deal_type")
-                        
+
                         deal_data = {
                             "id": deal.get("id"),
                             "deal_name": attributes.get("deal_name") or "Untitled Deal",
@@ -427,16 +436,11 @@ class BrevoClient:
                             "deal_type": deal_type_value,  # Store deal_type directly (Brevo attribute name)
                             "opportunity_type": deal_type_value,  # Also store as opportunity_type for backward compatibility
                             "created_at": created_at_str,
-                            "stage_updated_at": attributes.get("stage_updated_at"),
+                            "stage_updated_at": stage_updated_at_str,
                             "modified_at": modified_at_str or attributes.get("last_updated_date")
                         }
 
                         all_deals.append(deal_data)
-
-                    elif modified_at < start_time and created_at < start_time:
-                        # Deals are sorted by date desc, so we can stop
-                        logger.info("Reached deals outside time range, stopping pagination")
-                        return self._differentiate_deals(all_deals, start_time, end_time)
 
                 offset += limit
 
