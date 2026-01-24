@@ -112,7 +112,7 @@ class BrevoClient:
         """
         Filter notes according to client requirements:
         1. Only company-level notes (must have companyIds, no contactIds or dealIds)
-        2. Exclude Aura AI-generated notes (ending with "Generated automatically by Aura")
+        2. Exclude Aura AI-generated notes (contains "Generated automatically by Aura" or starts with "Auto-generated")
 
         Args:
             notes: List of note dictionaries
@@ -133,8 +133,13 @@ class BrevoClient:
                 continue
 
             # Filter 2: Exclude Aura AI-generated notes
-            note_text = note.get("text", "")
-            if note_text.strip().endswith("Generated automatically by Aura"):
+            # Check for multiple patterns since Aura notes may contain HTML or different formats
+            note_text = note.get("text", "").lower()
+            is_aura_note = (
+                "generated automatically by aura" in note_text or
+                note_text.strip().startswith("auto-generated")
+            )
+            if is_aura_note:
                 logger.debug(f"Filtering out Aura AI-generated note (ID: {note.get('id')})")
                 continue
 
