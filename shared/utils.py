@@ -19,6 +19,7 @@ PIPELINE_MAPPINGS = {
         "stages": {
             "9uaj093j221p3oiiply9hd8": "Identified",
             "arxdo4r2w2sz1l8a7by4j19": "Qualifying + Assessment",
+            "9divv1rw8nmfjerhzl3owz6": "Proposal Request",
             "85ngn6t35cnvpr8ig84vd0b": "Proposal Sent",
             "fy8rr3y4p9qdv6kj9136zjs": "In negotiation",
             "11iq446lg3w5dtgqjb5q21v": "On-Hold",
@@ -31,6 +32,7 @@ PIPELINE_MAPPINGS = {
         "stages": {
             "e8b624a6-1639-4843-810e-db83a0595130": "Identified",
             "97b3a62e-e19f-4997-8bbd-809240d86a4b": "Qualifying + Assessment",
+            "60g199y1nw0bcbku0mkv5a1": "Proposal Request",
             "gmkj3zvmk7pdrqkqnho1ziu": "Proposal Sent to rep",
             "e8d0451f-7036-4582-bdfd-16f61c1c57ab": "In negotiation",
             "9fb0aed8-af6e-4bd2-b138-a18fe113179c": "On-Hold",
@@ -43,7 +45,11 @@ PIPELINE_MAPPINGS = {
 # User ID mappings
 USER_MAPPINGS = {
     "6849de2c8da98f55690819b3": "Nicolas Attieh",
-    "6866dcf3af9c593d0806bb57": "Marvin Escalante"
+    "6866dcf3af9c593d0806bb57": "Marvin Escalante",
+    "697b82280cf6c54eb606a106": "Paul Quinn",
+    "697bfb2d60ae0c5cda038a8b": "Neil Chezepock",
+    "69820936066c7eb5ec00a151": "Solutions",
+    "698265a735270dc6db0bb3bc": "Doug Degen"
 }
 
 # Display name mappings for raw API values
