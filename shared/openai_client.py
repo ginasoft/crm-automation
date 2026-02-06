@@ -372,10 +372,22 @@ Please generate the executive summary report following all formatting requiremen
 
             response = self.client.chat.completions.create(**request_params)
 
-            summary = response.choices[0].message.content
+            # Log response details for debugging
+            choice = response.choices[0]
+            finish_reason = choice.finish_reason
+            summary = choice.message.content or ""
+
+            logger.info(f"OpenAI finish_reason: {finish_reason}")
+            logger.info(f"Tokens used: prompt={response.usage.prompt_tokens}, "
+                       f"completion={response.usage.completion_tokens}, "
+                       f"total={response.usage.total_tokens}")
+
+            if not summary:
+                logger.error(f"OpenAI returned empty content. finish_reason={finish_reason}, "
+                           f"refusal={choice.message.refusal if hasattr(choice.message, 'refusal') else 'N/A'}")
+                raise Exception(f"OpenAI returned empty response (finish_reason={finish_reason})")
 
             logger.info(f"Summary generated successfully ({len(summary)} characters)")
-            logger.debug(f"Tokens used: {response.usage.total_tokens}")
 
             return summary
 
