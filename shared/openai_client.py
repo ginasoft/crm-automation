@@ -280,6 +280,7 @@ FORMATTING RULES (must follow exactly):
 - Bold only for: section headings, author/owner names, Stage values, Amount values
 - If any field is missing, write "None"
 - Note summaries must be factual and short
+- For notes created by "Solutions" only: if the first word of the note is a name followed by a colon, treat that name as required context and always include it in the summary. Never omit or replace the name
 
 EXAMPLE OF REQUIRED ITEM FORMATTING (spacing matters exactly):
 - [Example Deal](URL)
@@ -360,7 +361,7 @@ Please generate the executive summary report following all formatting requiremen
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                "max_completion_tokens": 4000
+                "max_completion_tokens": 16000
             }
 
             # gpt-5 model only supports temperature=1, so we set it to 1 or omit it
