@@ -361,7 +361,7 @@ Please generate the executive summary report following all formatting requiremen
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                "max_completion_tokens": 16000
+                "max_completion_tokens": 24000
             }
 
             # gpt-5 model only supports temperature=1, so we set it to 1 or omit it
