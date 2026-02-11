@@ -170,11 +170,13 @@ Please contact the system administrator immediately.
         teams_client = TeamsClient()
 
         # Build the list of parts to send
+        # Teams displays newest message on top, so we send deals (2/2) first
+        # and notes (1/2) second, so notes appears above deals in the channel
         report_parts = []
-        if notes_summary:
-            report_parts.append(("CRM Daily Executive Summary (1/2)", notes_summary))
         if deals_summary:
             report_parts.append(("CRM Daily Executive Summary (2/2)", deals_summary))
+        if notes_summary:
+            report_parts.append(("CRM Daily Executive Summary (1/2)", notes_summary))
 
         if report_parts:
             teams_client.send_two_part_report(report_parts)
