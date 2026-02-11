@@ -3,7 +3,8 @@ Microsoft Teams webhook client for sending formatted reports.
 """
 import os
 import logging
-from typing import Optional
+import time
+from typing import Optional, List, Tuple
 import requests
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,34 @@ class TeamsClient:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to send report to Teams: {e}")
             raise
+
+    def send_two_part_report(self, parts: List[Tuple[str, str]], delay: float = 2.0) -> bool:
+        """
+        Send a multi-part report to Teams as sequential messages.
+
+        Args:
+            parts: List of (title, summary) tuples to send in order
+            delay: Seconds to wait between messages to preserve ordering
+
+        Returns:
+            bool: True if all parts sent successfully
+
+        Raises:
+            requests.RequestException: If any webhook request fails
+        """
+        logger.info(f"Sending {len(parts)}-part report to Teams")
+
+        for i, (title, summary) in enumerate(parts, 1):
+            logger.info(f"Sending part {i}/{len(parts)}: {title}")
+            self.send_report(summary, title=title)
+
+            # Small delay between messages to ensure Teams preserves order
+            if i < len(parts):
+                logger.info(f"Waiting {delay}s before sending next part...")
+                time.sleep(delay)
+
+        logger.info("All parts sent successfully")
+        return True
 
     def send_simple_message(self, text: str) -> bool:
         """

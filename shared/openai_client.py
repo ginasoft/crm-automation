@@ -194,32 +194,29 @@ class OpenAIClient:
 
         return "\n".join(context_parts)
 
-    def _build_system_prompt(self) -> str:
+    def _build_notes_system_prompt(self) -> str:
         """
-        Build the system prompt for GPT-4.
+        Build the system prompt for Part 1 (Notes only).
 
         Returns:
-            str: System prompt
+            str: System prompt for notes summary
         """
         return """You are an executive assistant generating daily CRM summary reports.
 
-
-
-Create a brief, factual summary of CRM activity following the exact structure and formatting below. This will be posted in Microsoft Teams (including mobile). Readability is critical.
+Create a brief, factual summary of CRM notes activity following the exact structure and formatting below. This will be posted in Microsoft Teams (including mobile). Readability is critical.
 
 STRUCTURE (must follow exactly):
 
-1) First line: CRM Daily Executive Summary
+1) First line: CRM Daily Executive Summary (1/2)
 2) Second line: {REPORT TITLE}
 3) Blank line
 
 4) Highlights
-- Notes: X
-- New deals: Y
-- Updated deals: Z
+- Total Notes: X
+- Notes by user: {Name}: X, {Name}: X, ...
 Blank line
 
-5) CRM Notes
+5) Notes Summary
 Group by Author. For each author:
 {Author Name}
 Blank line
@@ -233,9 +230,51 @@ Note: {Note summary}
 Blank line between notes
 Blank line between authors
 If none: None
+
+FORMATTING RULES (must follow exactly):
+- Output the header line CRM Daily Executive Summary (1/2) only once. Do not repeat it.
+- A "blank line" means one empty line (two newline characters in a row).
+- Bullets must start at the beginning of the line with "- " (no leading spaces)
+- Attribute lines must be on their own lines and indented by exactly two spaces
+- After every author line, include exactly one blank line before the first bullet
+- Never put a section heading and a name on the same line
+- The line containing a markdown link must contain ONLY the link and must end immediately after the closing ")". No extra characters after the link. No period, comma, colon, dash, or trailing spaces.
+- Preserve all markdown hyperlinks exactly as provided in the data
+- Bold only for: section headings, author names
+- If any field is missing, write "None"
+- Note summaries must be factual and short
+- For notes created by "Solutions" only: if the first word of the note is a name followed by a colon, treat that name as required context and always include it in the summary. Never omit or replace the name
+
+EXAMPLE OF REQUIRED ITEM FORMATTING (spacing matters exactly):
+- [Example Company](URL)
+Business Division: PACA
+Distributor: Wurth Canada
+Note: Discussed pricing for new product line
+"""
+
+    def _build_deals_system_prompt(self) -> str:
+        """
+        Build the system prompt for Part 2 (Deals only).
+
+        Returns:
+            str: System prompt for deals summary
+        """
+        return """You are an executive assistant generating daily CRM summary reports.
+
+Create a brief, factual summary of CRM deals activity following the exact structure and formatting below. This will be posted in Microsoft Teams (including mobile). Readability is critical.
+
+STRUCTURE (must follow exactly):
+
+1) First line: CRM Daily Executive Summary (2/2)
+2) Second line: {REPORT TITLE}
+3) Blank line
+
+4) Highlights
+- New Deals: X
+- Updated Deals: Y
 Blank line
 
-6) New Deals
+5) New Deals
 Group by Owner. For each owner:
 {Owner Name}
 Blank line
@@ -252,7 +291,7 @@ Blank line between owners
 If none: None
 Blank line
 
-7) Updated Deals
+6) Updated Deals
 Group by Owner. For each owner:
 {Owner Name}
 Blank line
@@ -269,18 +308,16 @@ Blank line between owners
 If none: None
 
 FORMATTING RULES (must follow exactly):
-- Output the header line CRM Daily Executive Summary only once. Do not repeat it.
+- Output the header line CRM Daily Executive Summary (2/2) only once. Do not repeat it.
 - A "blank line" means one empty line (two newline characters in a row).
 - Bullets must start at the beginning of the line with "- " (no leading spaces)
 - Attribute lines must be on their own lines and indented by exactly two spaces
-- After every author/owner line, include exactly one blank line before the first bullet
+- After every owner line, include exactly one blank line before the first bullet
 - Never put a section heading and a name on the same line
 - The line containing a markdown link must contain ONLY the link and must end immediately after the closing ")". No extra characters after the link. No period, comma, colon, dash, or trailing spaces.
 - Preserve all markdown hyperlinks exactly as provided in the data
-- Bold only for: section headings, author/owner names, Stage values, Amount values
+- Bold only for: section headings, owner names, Stage values, Amount values
 - If any field is missing, write "None"
-- Note summaries must be factual and short
-- For notes created by "Solutions" only: if the first word of the note is a name followed by a colon, treat that name as required context and always include it in the summary. Never omit or replace the name
 
 EXAMPLE OF REQUIRED ITEM FORMATTING (spacing matters exactly):
 - [Example Deal](URL)
@@ -290,110 +327,169 @@ Stage: Identified
 Amount: $0.00
 """
 
-    def _build_user_prompt(self, notes: List[Dict[str, Any]],
-                          deals_data: Dict[str, List[Dict[str, Any]]]) -> str:
+    def _build_notes_user_prompt(self, notes: List[Dict[str, Any]]) -> str:
         """
-        Build the user prompt with CRM data.
+        Build the user prompt for Part 1 (Notes only).
 
         Args:
             notes: List of enriched notes
-            deals_data: Dict with "new_deals" and "updated_deals" keys
 
         Returns:
-            str: User prompt with data
+            str: User prompt with notes data
         """
         report_title = format_report_title()
         notes_context = self._prepare_notes_context(notes)
-        deals_context = self._prepare_deals_context(deals_data)
 
-        prompt = f"""Generate an executive CRM summary report with the following data:
+        prompt = f"""Generate the Notes part of the CRM executive summary with the following data:
 
 REPORT TITLE: {report_title}
 
 CRM NOTES:
 {notes_context}
 
-DEALS:
-{deals_context}
-
-Please generate the executive summary report following all formatting requirements."""
+Please generate the notes summary report following all formatting requirements."""
 
         return prompt
 
-    def generate_summary(self, notes: List[Dict[str, Any]],
-                        deals_data: Dict[str, List[Dict[str, Any]]],
-                        temperature: float = 0.3) -> str:
+    def _build_deals_user_prompt(self, deals_data: Dict[str, List[Dict[str, Any]]]) -> str:
         """
-        Generate executive summary from CRM data using GPT-4.
+        Build the user prompt for Part 2 (Deals only).
+
+        Args:
+            deals_data: Dict with "new_deals" and "updated_deals" keys
+
+        Returns:
+            str: User prompt with deals data
+        """
+        report_title = format_report_title()
+        deals_context = self._prepare_deals_context(deals_data)
+
+        prompt = f"""Generate the Deals part of the CRM executive summary with the following data:
+
+REPORT TITLE: {report_title}
+
+DEALS:
+{deals_context}
+
+Please generate the deals summary report following all formatting requirements."""
+
+        return prompt
+
+    def _call_openai(self, system_prompt: str, user_prompt: str,
+                     temperature: float = 0.3, label: str = "summary") -> str:
+        """
+        Make an OpenAI API call and return the response content.
+
+        Args:
+            system_prompt: System prompt
+            user_prompt: User prompt
+            temperature: Model temperature (gpt-5 forces 1.0)
+            label: Label for logging
+
+        Returns:
+            str: Generated response content
+
+        Raises:
+            Exception: If OpenAI API call fails
+        """
+        # Log the data being sent to AI for debugging
+        logger.info("=" * 60)
+        logger.info(f"DATA BEING SENT TO AI ({label}):")
+        logger.info("=" * 60)
+        logger.info(f"USER PROMPT:\n{user_prompt}")
+        logger.info("=" * 60)
+
+        # Build request parameters
+        request_params = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            "max_completion_tokens": 24000
+        }
+
+        # gpt-5 model only supports temperature=1, so we set it to 1 or omit it
+        # For other models, use the provided temperature
+        if self.model == "gpt-5":
+            request_params["temperature"] = 1.0
+        else:
+            request_params["temperature"] = temperature
+
+        response = self.client.chat.completions.create(**request_params)
+
+        # Log response details for debugging
+        choice = response.choices[0]
+        finish_reason = choice.finish_reason
+        content = choice.message.content or ""
+
+        logger.info(f"OpenAI finish_reason ({label}): {finish_reason}")
+        logger.info(f"Tokens used ({label}): prompt={response.usage.prompt_tokens}, "
+                   f"completion={response.usage.completion_tokens}, "
+                   f"total={response.usage.total_tokens}")
+
+        if not content:
+            logger.error(f"OpenAI returned empty content ({label}). finish_reason={finish_reason}, "
+                       f"refusal={choice.message.refusal if hasattr(choice.message, 'refusal') else 'N/A'}")
+            raise Exception(f"OpenAI returned empty response (finish_reason={finish_reason})")
+
+        logger.info(f"{label} generated successfully ({len(content)} characters)")
+
+        return content
+
+    def generate_notes_summary(self, notes: List[Dict[str, Any]],
+                               temperature: float = 0.3) -> str:
+        """
+        Generate Part 1: Notes summary.
 
         Args:
             notes: List of enriched notes with company data
-            deals_data: Dict with "new_deals" and "updated_deals" keys
-            temperature: Model temperature (0.0-1.0, lower = more deterministic)
-                         Note: gpt-5 model only supports temperature=1
+            temperature: Model temperature (gpt-5 forces 1.0)
 
         Returns:
-            str: Generated markdown summary
+            str: Generated notes summary (Part 1/2)
+
+        Raises:
+            Exception: If OpenAI API call fails
+        """
+        logger.info(f"Generating notes summary for {len(notes)} notes")
+
+        try:
+            system_prompt = self._build_notes_system_prompt()
+            user_prompt = self._build_notes_user_prompt(notes)
+            return self._call_openai(system_prompt, user_prompt, temperature, label="notes-part1")
+
+        except Exception as e:
+            logger.error(f"Error generating notes summary: {e}")
+            raise
+
+    def generate_deals_summary(self, deals_data: Dict[str, List[Dict[str, Any]]],
+                               temperature: float = 0.3) -> str:
+        """
+        Generate Part 2: Deals summary.
+
+        Args:
+            deals_data: Dict with "new_deals" and "updated_deals" keys
+            temperature: Model temperature (gpt-5 forces 1.0)
+
+        Returns:
+            str: Generated deals summary (Part 2/2)
 
         Raises:
             Exception: If OpenAI API call fails
         """
         new_count = len(deals_data.get("new_deals", []))
         updated_count = len(deals_data.get("updated_deals", []))
-        logger.info(f"Generating summary for {len(notes)} notes, {new_count} new deals, "
+        logger.info(f"Generating deals summary for {new_count} new deals, "
                    f"{updated_count} updated deals")
 
         try:
-            system_prompt = self._build_system_prompt()
-            user_prompt = self._build_user_prompt(notes, deals_data)
-
-            # Log the data being sent to AI for debugging
-            logger.info("=" * 60)
-            logger.info("DATA BEING SENT TO AI:")
-            logger.info("=" * 60)
-            logger.info(f"USER PROMPT:\n{user_prompt}")
-            logger.info("=" * 60)
-
-            # Build request parameters
-            request_params = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                "max_completion_tokens": 24000
-            }
-
-            # gpt-5 model only supports temperature=1, so we set it to 1 or omit it
-            # For other models, use the provided temperature
-            if self.model == "gpt-5":
-                request_params["temperature"] = 1.0
-            else:
-                request_params["temperature"] = temperature
-
-            response = self.client.chat.completions.create(**request_params)
-
-            # Log response details for debugging
-            choice = response.choices[0]
-            finish_reason = choice.finish_reason
-            summary = choice.message.content or ""
-
-            logger.info(f"OpenAI finish_reason: {finish_reason}")
-            logger.info(f"Tokens used: prompt={response.usage.prompt_tokens}, "
-                       f"completion={response.usage.completion_tokens}, "
-                       f"total={response.usage.total_tokens}")
-
-            if not summary:
-                logger.error(f"OpenAI returned empty content. finish_reason={finish_reason}, "
-                           f"refusal={choice.message.refusal if hasattr(choice.message, 'refusal') else 'N/A'}")
-                raise Exception(f"OpenAI returned empty response (finish_reason={finish_reason})")
-
-            logger.info(f"Summary generated successfully ({len(summary)} characters)")
-
-            return summary
+            system_prompt = self._build_deals_system_prompt()
+            user_prompt = self._build_deals_user_prompt(deals_data)
+            return self._call_openai(system_prompt, user_prompt, temperature, label="deals-part2")
 
         except Exception as e:
-            logger.error(f"Error generating summary with OpenAI: {e}")
+            logger.error(f"Error generating deals summary: {e}")
             raise
 
     def generate_error_summary(self, errors: List[str]) -> str:

@@ -88,44 +88,59 @@ def main(mytimer: func.TimerRequest) -> None:
         logger.error(error_msg)
         errors.append(error_msg)
 
-    # Step 2: Generate summary with OpenAI
-    logger.info("Step 2: Generating executive summary with OpenAI")
-    summary = None
+    # Step 2: Generate summaries with OpenAI (two-part report)
+    logger.info("Step 2: Generating executive summaries with OpenAI")
+    notes_summary = None
+    deals_summary = None
 
     try:
         openai_client = OpenAIClient()
 
-        # Check if there's any activity to report
+        has_notes = bool(notes)
         has_deals = bool(deals_data.get("new_deals") or deals_data.get("updated_deals"))
 
-        if not notes and not has_deals:
+        if not has_notes and not has_deals:
             # No activity to report
             logger.info("No CRM activity found - generating empty report")
-            summary = openai_client.generate_empty_report()
+            notes_summary = openai_client.generate_empty_report()
 
-        elif errors:
-            # Partial data available
-            logger.warning("Generating partial report due to errors")
-            if notes or has_deals:
-                # Try to generate summary with available data
-                try:
-                    summary = openai_client.generate_summary(notes, deals_data)
-                    # Prepend error notice
-                    error_notice = "⚠️ **Note:** Some data may be incomplete due to API errors.\n\n"
-                    summary = error_notice + summary
-                except Exception as e:
-                    logger.error(f"Failed to generate summary with partial data: {e}")
-                    summary = openai_client.generate_error_summary(errors)
-            else:
-                # No data at all
-                summary = openai_client.generate_error_summary(errors)
+        elif errors and not has_notes and not has_deals:
+            # Errors and no data at all
+            notes_summary = openai_client.generate_error_summary(errors)
 
         else:
-            # Normal operation - generate full summary
-            logger.info("Generating full summary report")
-            summary = openai_client.generate_summary(notes, deals_data)
+            error_notice = ""
+            if errors:
+                logger.warning("Generating partial report due to errors")
+                error_notice = "⚠️ **Note:** Some data may be incomplete due to API errors.\n\n"
 
-        logger.info("Summary generated successfully")
+            # Generate Part 1: Notes summary
+            if has_notes:
+                try:
+                    logger.info("Generating Part 1: Notes summary")
+                    notes_summary = openai_client.generate_notes_summary(notes)
+                    if error_notice:
+                        notes_summary = error_notice + notes_summary
+                except Exception as e:
+                    logger.error(f"Failed to generate notes summary: {e}")
+                    notes_summary = openai_client.generate_error_summary(
+                        [f"Failed to generate notes summary: {str(e)}"]
+                    )
+
+            # Generate Part 2: Deals summary
+            if has_deals:
+                try:
+                    logger.info("Generating Part 2: Deals summary")
+                    deals_summary = openai_client.generate_deals_summary(deals_data)
+                    if error_notice:
+                        deals_summary = error_notice + deals_summary
+                except Exception as e:
+                    logger.error(f"Failed to generate deals summary: {e}")
+                    deals_summary = openai_client.generate_error_summary(
+                        [f"Failed to generate deals summary: {str(e)}"]
+                    )
+
+        logger.info("Summary generation complete")
 
     except Exception as e:
         error_msg = f"Failed to generate summary: {str(e)}"
@@ -135,10 +150,10 @@ def main(mytimer: func.TimerRequest) -> None:
         # Try to create a basic error summary
         try:
             openai_client_fallback = OpenAIClient()
-            summary = openai_client_fallback.generate_error_summary(errors)
+            notes_summary = openai_client_fallback.generate_error_summary(errors)
         except:
             # Last resort - create manual error message
-            summary = f"""# CRM Daily Report - Error
+            notes_summary = f"""# CRM Daily Report - Error
 
 ## Critical Error
 
@@ -149,14 +164,21 @@ The automated report generation failed with the following errors:
 Please contact the system administrator immediately.
 """
 
-    # Step 3: Send report to Teams
+    # Step 3: Send report(s) to Teams
     logger.info("Step 3: Sending report to Microsoft Teams")
     try:
         teams_client = TeamsClient()
 
-        if summary:
-            teams_client.send_report(summary, title="CRM Daily Executive Summary")
-            logger.info("Report sent to Teams successfully")
+        # Build the list of parts to send
+        report_parts = []
+        if notes_summary:
+            report_parts.append(("CRM Daily Executive Summary (1/2)", notes_summary))
+        if deals_summary:
+            report_parts.append(("CRM Daily Executive Summary (2/2)", deals_summary))
+
+        if report_parts:
+            teams_client.send_two_part_report(report_parts)
+            logger.info(f"Report sent to Teams successfully ({len(report_parts)} part(s))")
         else:
             raise Exception("No summary content available to send")
 
