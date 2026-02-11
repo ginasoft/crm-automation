@@ -375,10 +375,16 @@ Please generate the deals summary report following all formatting requirements."
 
         return prompt
 
+    # Token limits: initial cap and retry cap when output is truncated
+    _INITIAL_MAX_TOKENS = 24000
+    _RETRY_MAX_TOKENS = 32000
+
     def _call_openai(self, system_prompt: str, user_prompt: str,
                      temperature: float = 0.3, label: str = "summary") -> str:
         """
         Make an OpenAI API call and return the response content.
+        If the response is truncated (finish_reason=length), retries once
+        with a higher token cap to avoid sending incomplete reports.
 
         Args:
             system_prompt: System prompt
@@ -406,7 +412,7 @@ Please generate the deals summary report following all formatting requirements."
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            "max_completion_tokens": 24000
+            "max_completion_tokens": self._INITIAL_MAX_TOKENS
         }
 
         # gpt-5 model only supports temperature=1, so we set it to 1 or omit it
@@ -427,6 +433,26 @@ Please generate the deals summary report following all formatting requirements."
         logger.info(f"Tokens used ({label}): prompt={response.usage.prompt_tokens}, "
                    f"completion={response.usage.completion_tokens}, "
                    f"total={response.usage.total_tokens}")
+
+        # Retry once with a higher cap if the output was truncated
+        if finish_reason == "length":
+            logger.warning(f"Output truncated ({label}), retrying with "
+                         f"max_completion_tokens={self._RETRY_MAX_TOKENS}")
+            request_params["max_completion_tokens"] = self._RETRY_MAX_TOKENS
+            response = self.client.chat.completions.create(**request_params)
+
+            choice = response.choices[0]
+            finish_reason = choice.finish_reason
+            content = choice.message.content or ""
+
+            logger.info(f"OpenAI retry finish_reason ({label}): {finish_reason}")
+            logger.info(f"Retry tokens used ({label}): prompt={response.usage.prompt_tokens}, "
+                       f"completion={response.usage.completion_tokens}, "
+                       f"total={response.usage.total_tokens}")
+
+            if finish_reason == "length":
+                logger.warning(f"Output still truncated after retry ({label}), "
+                             f"returning best-effort content")
 
         if not content:
             logger.error(f"OpenAI returned empty content ({label}). finish_reason={finish_reason}, "
