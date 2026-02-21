@@ -134,6 +134,7 @@ class OpenAIClient:
                 stage_id = formatted_deal.get("deal_stage", "")
                 stage_name = get_stage_name(pipeline_id, stage_id)
                 amount = format_currency(formatted_deal.get("amount", 0))
+                yearly_spend_amount = format_currency(formatted_deal.get("yearly_spend_amount", 0))
                 distributor = formatted_deal.get("distributor", "N/A")
                 # Check both deal_type and opportunity_type (Brevo uses deal_type)
                 opportunity_type = formatted_deal.get("deal_type") or formatted_deal.get("opportunity_type", "N/A")
@@ -148,6 +149,7 @@ class OpenAIClient:
                     f"  Pipeline: {pipeline_name}\n"
                     f"  Stage: {stage_name}\n"
                     f"  Amount: {amount}\n"
+                    f"  Yearly Spend: {yearly_spend_amount}\n"
                     f"  Distributor: {distributor}\n"
                     f"  Opportunity Type: {opportunity_type}\n"
                     f"  Created: {created_at}\n"
@@ -170,6 +172,7 @@ class OpenAIClient:
                 stage_id = formatted_deal.get("deal_stage", "")
                 stage_name = get_stage_name(pipeline_id, stage_id)
                 amount = format_currency(formatted_deal.get("amount", 0))
+                yearly_spend_amount = format_currency(formatted_deal.get("yearly_spend_amount", 0))
                 distributor = formatted_deal.get("distributor", "N/A")
                 # Check both deal_type and opportunity_type (Brevo uses deal_type)
                 # This fixes the issue where deal_type was not being passed to updated deals
@@ -185,6 +188,7 @@ class OpenAIClient:
                     f"  Pipeline: {pipeline_name}\n"
                     f"  Current Stage: {stage_name}\n"
                     f"  Amount: {amount}\n"
+                    f"  Yearly Spend: {yearly_spend_amount}\n"
                     f"  Distributor: {distributor}\n"
                     f"  Opportunity Type: {opportunity_type}\n"
                     f"  Stage Updated: {stage_updated_at}\n"

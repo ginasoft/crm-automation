@@ -346,6 +346,7 @@ class BrevoClient:
                 - pipeline_id: Pipeline ID
                 - distributor: Distribution channel
                 - amount: Deal value
+                - yearly_spend_amount: Yearly spend amount
                 - opportunity_type: Deal category
                 - created_at: ISO datetime string
                 - stage_updated_at: ISO datetime string
@@ -438,6 +439,7 @@ class BrevoClient:
                             "pipeline_id": attributes.get("pipeline"),
                             "distributor": attributes.get("distributor"),
                             "amount": attributes.get("amount", 0),
+                            "yearly_spend_amount": attributes.get("yearly_spend_amount"),
                             "deal_type": deal_type_value,  # Store deal_type directly (Brevo attribute name)
                             "opportunity_type": deal_type_value,  # Also store as opportunity_type for backward compatibility
                             "created_at": created_at_str,
