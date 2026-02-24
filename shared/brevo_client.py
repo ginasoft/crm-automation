@@ -439,7 +439,7 @@ class BrevoClient:
                             "pipeline_id": attributes.get("pipeline"),
                             "distributor": attributes.get("distributor"),
                             "amount": attributes.get("amount", 0),
-                            "yearly_spend_amount": attributes.get("yearly_spend_amount"),
+                            "yearly_spend_amount": attributes.get("yearly_spend_amount", 0),
                             "deal_type": deal_type_value,  # Store deal_type directly (Brevo attribute name)
                             "opportunity_type": deal_type_value,  # Also store as opportunity_type for backward compatibility
                             "created_at": created_at_str,
