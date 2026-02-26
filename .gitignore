@@ -9,7 +9,6 @@ bin/
 lib/
 lib64/
 .azure/
-.vscode/
 
 # Virtual Environment
 venv/
@@ -43,3 +42,6 @@ doc/
 .claude/
 
 .python_packages
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
