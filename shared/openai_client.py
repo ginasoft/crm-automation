@@ -289,6 +289,7 @@ Deal Type: {Deal Type}
 Distributor: {Distributor}
 Stage: {Stage}
 Amount: {Amount}
+Yearly Spend: {Yearly Spend}
 
 Blank line between deals
 Blank line between owners
@@ -306,6 +307,7 @@ Deal Type: {Deal Type}
 Distributor: {Distributor}
 Stage: {Stage}
 Amount: {Amount}
+Yearly Spend: {Yearly Spend}
 
 Blank line between deals
 Blank line between owners
@@ -329,6 +331,7 @@ Deal Type: Reactivation
 Distributor: Wurth Canada
 Stage: Identified
 Amount: $0.00
+Yearly Spend: $10,000.00
 """
 
     def _build_notes_user_prompt(self, notes: List[Dict[str, Any]]) -> str:
